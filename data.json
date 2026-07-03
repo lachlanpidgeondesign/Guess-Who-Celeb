@@ -1,0 +1,20 @@
+[
+  {
+    "Player": "Jenilee Harrison",
+    "Nation": "",
+    "images": [
+      "guess-who-images/1.avif",
+      "guess-who-images/2.avif",
+      "guess-who-images/3.avif"
+    ],
+    "revealImage": "guess-who-images/r1.avif",
+    "clues": [
+      "This former actress was spotted in Los Angeles on a rare outing with her adorable white Chihuahua earlier this week.",
+      "The 68-year-old television star was pictured running errands with her cute pooch, who was along for the ride in a carrier strapped to her chest.",
+      "She's best known for replacing one of the stars of a hit '70s sitcom as it moved into the 1980s.",
+      "Later that decade, she joined the cast of a massively popular primetime soap opera for several years.",
+      "After establishing herself as a sex symbol on screen, this star posed for Playboy in 1987 – but with unusual stipulations that kept the photoshoot on her terms."
+    ],
+    "Significance": ""
+  }
+]

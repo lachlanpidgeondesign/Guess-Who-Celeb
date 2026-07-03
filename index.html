@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, viewport-fit=cover">
+    <title>Guess Who | Daily Mail</title>
+    <meta name="description" content="Can you guess the mystery celebrity from a series of clues? Play the Daily Mail's Guess Who game.">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="canonical" href="https://www.dailymail.co.uk/world-cup-legends-quiz">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Guess Who | Daily Mail">
+    <meta property="og:description" content="Can you guess the mystery celebrity from a series of clues?">
+    <meta property="og:type" content="website">
+
+    <!-- Preconnect to font CDN -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://flagcdn.com">
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700;800&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Zalando+Sans+Expanded:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css?v=11">
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Guess Who",
+      "description": "Guess the mystery celebrity from a series of clues.",
+      "applicationCategory": "Game",
+      "publisher": { "@type": "Organization", "name": "Daily Mail" }
+    }
+    </script>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="quiz-header">
+    <img src="images/Guess Who.svg" alt="Guess Who" class="header-icon">
+    <button class="header-results-btn hidden" id="header-results-btn">Results</button>
+</header>
+
+<!-- HOW TO PLAY OVERLAY -->
+<div class="htp-overlay hidden" id="htp-overlay" role="dialog" aria-modal="true" aria-label="How to play">
+    <div class="htp-panel">
+        <button class="htp-close" onclick="document.getElementById('htp-overlay').classList.add('hidden')">&times;</button>
+        <h3 class="htp-title">How to play</h3>
+        <p class="htp-text">Welcome to <strong>Guess Who</strong>, the Daily Mail's celebrity guessing game.</p>
+        <p class="htp-text">We'll give you a mystery celebrity to guess from a series of five clues. With every incorrect guess, we'll reveal another clue.</p>
+        <p class="htp-text">Can you guess who it is? Good luck!</p>
+    </div>
+</div>
+
+<!-- DAY PICKER OVERLAY -->
+<div class="day-picker-overlay" id="day-picker-overlay" role="dialog" aria-modal="true" aria-label="Day picker">
+    <div class="day-picker-panel" id="day-picker-panel">
+        <h3>Select a day</h3>
+        <div class="picker-grid" id="picker-grid"></div>
+    </div>
+</div>
+
+<!-- MAIN -->
+<main class="game-container">
+
+    <!-- PRE-LAUNCH -->
+    <div id="pre-launch-screen" class="screen">
+        <div class="pre-launch">
+            <h2>Coming soon</h2>
+            <p>The World Cup legends quiz launches on<br><strong style="color:var(--accent);font-size:17px;">1 June 2026</strong></p>
+            <div class="countdown" id="countdown-display"></div>
+            <p>50 days. 50 legends. Can you name them all?</p>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="game-screen" class="screen">
+
+        <div class="game-layout">
+            <!-- Card: the hero -->
+            <div class="game-col-card">
+                <div class="card-container" id="card-container">
+                    <div class="quiz-card" id="quiz-card">
+                        <div class="team-strip" id="team-strip">LOADING</div>
+                        <div class="photo-frame">
+                            <div class="carousel" id="carousel">
+                                <div class="carousel-track" id="carousel-track"><!-- slides injected --></div>
+                                <button class="carousel-arrow prev" id="carousel-prev" aria-label="Previous image">‹</button>
+                                <button class="carousel-arrow next" id="carousel-next" aria-label="Next image">›</button>
+                                <div class="carousel-dots" id="carousel-dots"></div>
+                            </div>
+                        </div>
+                        <div class="info-block">
+                            <div class="badge-area" id="badge-area"></div>
+                            <div class="name-area">
+                                <span class="card-name hidden-name" id="card-name">? ? ?</span>
+                            </div>
+                        </div>
+                        <div class="plastic-sheen"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Play area: clue + guess + attempts -->
+            <div class="game-col-play">
+                <!-- Attempts (above clue) -->
+                <div class="attempts-display" id="attempts-display"></div>
+
+                <!-- Single current clue -->
+                <div id="clue-display"></div>
+
+                <!-- Feedback -->
+                <div class="feedback hidden" id="feedback" style="display:none"></div>
+
+                <!-- Guess -->
+                <div class="guess-area" id="guess-area">
+                    <label for="guess-input" class="sr-only">Guess here</label>
+                    <input type="text" id="guess-input" placeholder="Guess here" autocomplete="off" spellcheck="false" aria-label="Guess here">
+                    <button id="guess-btn" aria-label="Submit guess">Submit</button>
+                </div>
+
+                <!-- Next clue -->
+                <button class="next-clue-btn" id="next-clue-btn">Next clue</button>
+
+                <!-- Answer reveal -->
+                <div class="answer-reveal hidden" id="answer-reveal"></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- RESULT OVERLAY -->
+<div class="result-overlay hidden" id="result-overlay" role="dialog" aria-modal="true" aria-label="Result">
+    <div class="result-area" id="result-area">
+        <button class="result-close" id="result-close" onclick="document.getElementById('result-overlay').classList.add('hidden')">&times;</button>
+        <div class="result-header-badge">
+            <img src="images/Guess Who.svg" alt="" class="result-icon">
+            <div class="result-header-text">GUESS WHO | <span id="result-date-label"></span></div>
+        </div>
+        <div class="result-title" id="result-title"></div>
+        <div class="result-card">
+            <div class="result-score" id="result-score"></div>
+            <img class="result-reveal-img hidden" id="result-reveal-img" alt="" decoding="async">
+            <div class="result-funfact" id="result-funfact"></div>
+        </div>
+        <button class="result-share-btn" id="result-share-btn" onclick="toggleShareSection()">Share</button>
+        <div class="share-section hidden" id="share-section">
+            <div class="share-message" id="share-message"></div>
+            <div class="share-icons">
+                <button class="share-icon" onclick="shareTo('facebook')"><img src="images/facebook.png" alt="Facebook"></button>
+                <button class="share-icon" onclick="shareTo('x')"><img src="images/x.png" alt="X"></button>
+                <button class="share-icon" onclick="shareTo('whatsapp')"><img src="images/whatsapp.png" alt="WhatsApp"></button>
+                <button class="share-icon" onclick="shareTo('linkedin')"><img src="images/linkedin.png" alt="LinkedIn"></button>
+            </div>
+            <div class="share-copied-toast hidden" id="share-copied-toast">Copied to clipboard — paste into your post!</div>
+        </div>
+        <div class="result-play-more">
+            <div class="result-play-more-title">Play more</div>
+           <!--
+            <a href="#" class="play-more-link play-more-wc" target="_blank" rel="noopener">
+                <img src="images/Word Cup Quiz - Thumbnail.svg" alt="" class="play-more-icon-img">
+                <div class="play-more-info"><strong>World Cup Quiz</strong><span>Test your football knowledge</span></div>
+            </a>-->
+            <a href="http://dailymail.com/games/game/index.html?game=guessword&meta=guessword&type=default&utm_campaign_legends" class="play-more-link play-more-gw" target="_blank" rel="noopener">
+                <img src="images/GuessWord Thumbnail.svg" alt="" class="play-more-icon-img">
+                <div class="play-more-info"><strong>GuessWord</strong><span>Decipher in six attempts - or you're out</span></div>
+            </a>
+            <a href="https://www.dailymail.com/games/game/index.html?game=color-connect&type=aW50ZWdyYXRpb24x&utm_campaign_legends" class="play-more-link play-more-cc" target="_blank" rel="noopener">
+                <img src="images/Color Connect Thumbnail.svg" alt="" class="play-more-icon-img">
+                <div class="play-more-info"><strong>Colour Connect</strong><span>Join the dots</span></div>
+            </a>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="script.js?v=11" defer></script>
+</body>
+</html>
