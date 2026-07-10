@@ -6,7 +6,7 @@
     <title>Guess Who | Daily Mail</title>
     <meta name="description" content="Can you guess the mystery celebrity from a series of clues? Play the Daily Mail's Guess Who game.">
     <meta name="theme-color" content="#ffffff">
-    <link rel="canonical" href="https://www.dailymail.co.uk/world-cup-legends-quiz">
+    <link rel="canonical" href="https://www.dailymail.co.uk/guess-who">
 
     <!-- Open Graph -->
     <meta property="og:title" content="Guess Who | Daily Mail">
@@ -16,7 +16,6 @@
     <!-- Preconnect to font CDN -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://flagcdn.com">
 
     <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700;800&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
@@ -72,9 +71,9 @@
     <div id="pre-launch-screen" class="screen">
         <div class="pre-launch">
             <h2>Coming soon</h2>
-            <p>The World Cup legends quiz launches on<br><strong style="color:var(--accent);font-size:17px;">1 June 2026</strong></p>
+            <p>Guess Who launches on<br><strong style="color:var(--accent);font-size:17px;">1 June 2026</strong></p>
             <div class="countdown" id="countdown-display"></div>
-            <p>50 days. 50 legends. Can you name them all?</p>
+            <p>Can you guess the mystery celebrity?</p>
         </div>
     </div>
 
@@ -86,17 +85,10 @@
             <div class="game-col-card">
                 <div class="card-container" id="card-container">
                     <div class="quiz-card" id="quiz-card">
-                        <div class="team-strip" id="team-strip">LOADING</div>
                         <div class="photo-frame">
-                            <div class="carousel" id="carousel">
-                                <div class="carousel-track" id="carousel-track"><!-- slides injected --></div>
-                                <button class="carousel-arrow prev" id="carousel-prev" aria-label="Previous image">‹</button>
-                                <button class="carousel-arrow next" id="carousel-next" aria-label="Next image">›</button>
-                                <div class="carousel-dots" id="carousel-dots"></div>
-                            </div>
+                            <img class="card-photo" id="card-photo" alt="Mystery celebrity" decoding="async">
                         </div>
                         <div class="info-block">
-                            <div class="badge-area" id="badge-area"></div>
                             <div class="name-area">
                                 <span class="card-name hidden-name" id="card-name">? ? ?</span>
                             </div>
@@ -161,11 +153,6 @@
         </div>
         <div class="result-play-more">
             <div class="result-play-more-title">Play more</div>
-           <!--
-            <a href="#" class="play-more-link play-more-wc" target="_blank" rel="noopener">
-                <img src="images/Word Cup Quiz - Thumbnail.svg" alt="" class="play-more-icon-img">
-                <div class="play-more-info"><strong>World Cup Quiz</strong><span>Test your football knowledge</span></div>
-            </a>-->
             <a href="http://dailymail.com/games/game/index.html?game=guessword&meta=guessword&type=default&utm_campaign_legends" class="play-more-link play-more-gw" target="_blank" rel="noopener">
                 <img src="images/GuessWord Thumbnail.svg" alt="" class="play-more-icon-img">
                 <div class="play-more-info"><strong>GuessWord</strong><span>Decipher in six attempts - or you're out</span></div>

@@ -445,20 +445,6 @@ body {
     );
 }
 
-/* ---- TEAM STRIP ---- */
-.quiz-card .team-strip {
-    width: 100%;
-    padding: 5px 12px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    text-align: center;
-    text-transform: uppercase;
-    border-bottom: 2px solid rgba(0,0,0,0.12);
-    flex-shrink: 0;
-    z-index: 2;
-}
-
 /* ---- PHOTO FRAME ---- */
 .quiz-card .photo-frame {
     flex: 1 1 auto;
@@ -467,73 +453,15 @@ body {
     border-bottom: 3px solid rgba(0,0,0,0.08);
     min-height: 0;
 }
-/* ---- CAROUSEL ---- */
-.carousel {
-    position: relative;
+.quiz-card .card-photo {
     width: 100%;
     height: 100%;
-    overflow: hidden;
-}
-.carousel-track {
-    display: flex;
-    height: 100%;
-    transition: transform 0.3s ease;
-    will-change: transform;
-}
-.carousel-track img {
-    width: 100%;
-    height: 100%;
-    flex: 0 0 100%;
     object-fit: cover;
     object-position: center top;
     display: block;
     user-select: none;
     -webkit-user-drag: none;
 }
-.carousel-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    border: none;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.45);
-    color: #fff;
-    font-size: 20px;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 5;
-    transition: background 0.2s;
-}
-.carousel-arrow:hover { background: rgba(0,0,0,0.65); }
-.carousel-arrow.prev { left: 6px; }
-.carousel-arrow.next { right: 6px; }
-.carousel-arrow.hidden { display: none; }
-.carousel-dots {
-    position: absolute;
-    left: 0; right: 0;
-    bottom: 8px;
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    z-index: 5;
-}
-.carousel-dots.hidden { display: none; }
-.carousel-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.5);
-    border: 1px solid rgba(0,0,0,0.25);
-    cursor: pointer;
-    transition: background 0.2s;
-}
-.carousel-dot.active { background: #fff; }
 
 /* ---- INFO BLOCK (bottom of card) ---- */
 .quiz-card .info-block {
@@ -545,31 +473,6 @@ body {
     border-top: 1px solid rgba(0,0,0,0.06);
     min-height: 52px;
     flex-shrink: 0;
-}
-.quiz-card .badge-area {
-    flex-shrink: 0;
-    width: 34px;
-    height: 34px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f0efeb;
-    border-radius: 50%;
-    border: 1.5px solid #ddd;
-    overflow: hidden;
-}
-.quiz-card .flag-badge {
-    width: 22px;
-    height: 16px;
-    object-fit: cover;
-    border-radius: 2px;
-    display: block;
-}
-.quiz-card .flag-badge-text {
-    font-size: 10px;
-    font-weight: 700;
-    color: #888;
-    letter-spacing: 0.5px;
 }
 .quiz-card .name-area {
     flex: 1;
@@ -1061,7 +964,6 @@ body {
 
 @media (min-width: 720px) {
     .quiz-card { width: 260px; height: 390px; }
-    .quiz-card .team-strip { font-size: 12px; }
     .quiz-card .card-name { font-size: 15px; }
     .game-container { padding: 20px 24px 40px; }
 }

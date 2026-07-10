@@ -5,73 +5,10 @@ const START_DATE = new Date(2026, 5, 1); // June 1, 2026
 const TOTAL_GAMES = 1;
 const MAX_GUESSES = 5;
 
-/* Country code lookup for flag images */
-const COUNTRY_FLAGS = {
-    "Argentina": "ar",
-    "France": "fr",
-    "England": "gb-eng",
-    "Brazil": "br",
-    "Croatia": "hr",
-    "Netherlands": "nl",
-    "West Germany": "de",
-    "W. Germany": "de",
-    "Germany": "de",
-    "Italy": "it",
-    "Cameroon": "cm",
-    "Spain": "es",
-    "Portugal": "pt",
-    "Colombia": "co",
-    "Morocco": "ma",
-    "Bulgaria": "bg",
-    "Uruguay": "uy",
-    "Poland": "pl",
-    "Peru": "pe",
-    "Romania": "ro"
-};
-
-/* Nation strip colours */
-const NATION_STRIPS = {
-    "Argentina": { bg: "#75aadb", color: "#fff" },
-    "France": { bg: "#002395", color: "#fff" },
-    "England": { bg: "#cf081f", color: "#fff" },
-    "Brazil": { bg: "#ffdf00", color: "#002776" },
-    "Croatia": { bg: "#ff0000", color: "#fff" },
-    "Netherlands": { bg: "#ff6600", color: "#fff" },
-    "West Germany": { bg: "#000", color: "#ffcc00" },
-    "W. Germany": { bg: "#000", color: "#ffcc00" },
-    "Germany": { bg: "#000", color: "#ffcc00" },
-    "Italy": { bg: "#0066cc", color: "#fff" },
-    "Cameroon": { bg: "#007a5e", color: "#fcd116" },
-    "Spain": { bg: "#c60b1e", color: "#ffc400" },
-    "Portugal": { bg: "#006600", color: "#fff" },
-    "Colombia": { bg: "#fcd116", color: "#003893" },
-    "Morocco": { bg: "#c1272d", color: "#fff" },
-    "Bulgaria": { bg: "#00966e", color: "#fff" },
-    "Uruguay": { bg: "#001489", color: "#fff" },
-    "Poland": { bg: "#dc143c", color: "#fff" },
-    "Peru": { bg: "#d91023", color: "#fff" },
-    "Romania": { bg: "#fcd116", color: "#002b7f" }
-};
-
-/* Image filename overrides for names that don't map cleanly */
-const IMAGE_OVERRIDES = {
-    "Ronaldo ": "Ronaldo.webp",
-    "Sir Geoff Hurst": "Geoff_Hurst.webp",
-    "Andres Iniesta": "Andres_Iniesta.webp"
-};
-
 /* ============================================
-   PLAYER DATA - loaded from data.json
+   CELEBRITY DATA - loaded from data.json
    ============================================ */
 let PLAYERS = [];
-
-function buildImagePath(playerName) {
-    var trimmed = playerName.trim();
-    if (IMAGE_OVERRIDES[playerName]) return "footballers/" + IMAGE_OVERRIDES[playerName];
-    // Remove "Sir " prefix if present
-    var name = trimmed.replace(/^Sir /, '');
-    return "footballers/" + name.replace(/ /g, '_') + ".webp";
-}
 
 function parseClues(clueString) {
     if (!clueString || !clueString.trim()) return [];
@@ -113,12 +50,13 @@ async function loadPlayerData() {
         var data = await response.json();
         PLAYERS = data.map(function(entry) {
             var name = entry.Player.trim();
-            var nation = entry.Nation;
-            var strip = NATION_STRIPS[nation] || { bg: "#333", color: "#fff" };
             var display = buildDisplayName(name);
-            // Carousel images: use the entry's images array, else fall back to the single derived image
-            var images = entry.images || entry.Images;
-            if (!images || !images.length) images = [buildImagePath(entry.Player)];
+            // Single image: use the entry's image, else the first of an images array
+            var image = entry.image || entry.Image;
+            if (!image) {
+                var imgs = entry.images || entry.Images;
+                image = (imgs && imgs.length) ? imgs[0] : '';
+            }
             // Clues: accept a ready-made array, else parse the numbered string
             var clues = entry.clues || entry.Clues;
             clues = Array.isArray(clues) ? clues.slice() : parseClues(clues);
@@ -127,12 +65,9 @@ async function loadPlayerData() {
                 displayFirst: display.first,
                 displayLast: display.last,
                 accepted: buildAccepted(name),
-                nation: nation,
                 label: entry.label || entry.Label || null,
-                images: images,
+                image: image,
                 revealImage: entry.revealImage || entry.RevealImage || null,
-                stripBg: strip.bg,
-                stripColor: strip.color,
                 clues: clues,
                 funFact: entry.Significance || ""
             };
@@ -237,44 +172,10 @@ function getGameState(day) {
    RENDERING
    ============================================ */
 
-function getFlagUrl(nation) {
-    const code = COUNTRY_FLAGS[nation];
-    if (!code) return null;
-    return 'https://flagcdn.com/w40/' + code + '.png';
-}
-
 function renderCard(player) {
     var card = document.getElementById('quiz-card');
-    var strip = document.getElementById('team-strip');
-    var badge = document.getElementById('badge-area');
     var nameEl = document.getElementById('card-name');
     var state = getGameState(currentDay);
-
-    // Card chrome: optional generic label, else nation strip + flag, else nothing
-    if (player.label) {
-        strip.textContent = player.label;
-        strip.style.background = '#191919';
-        strip.style.color = '#fff';
-        strip.style.display = '';
-        badge.innerHTML = '';
-        badge.style.display = 'none';
-    } else if (player.nation) {
-        strip.textContent = player.nation.toUpperCase();
-        strip.style.background = player.stripBg;
-        strip.style.color = player.stripColor;
-        strip.style.display = '';
-        badge.style.display = '';
-        var flagUrl = getFlagUrl(player.nation);
-        if (flagUrl) {
-            badge.innerHTML = '<img class="flag-badge" src="' + flagUrl + '" alt="' + player.nation + '" loading="lazy">';
-        } else {
-            badge.innerHTML = '<span class="flag-badge-text">' + player.nation.substring(0,3).toUpperCase() + '</span>';
-        }
-    } else {
-        strip.style.display = 'none';
-        badge.innerHTML = '';
-        badge.style.display = 'none';
-    }
 
     // Reveal the name only once the game is over
     if (state.completed) {
@@ -290,59 +191,19 @@ function renderCard(player) {
         card.classList.remove('revealed');
     }
 
-    renderCarousel(player);
+    renderPhoto(player);
 }
 
-/* ---- CAROUSEL ---- */
-var carouselState = { index: 0, count: 1 };
-
-function renderCarousel(player) {
-    var track = document.getElementById('carousel-track');
-    var dots = document.getElementById('carousel-dots');
-    var prev = document.getElementById('carousel-prev');
-    var next = document.getElementById('carousel-next');
-    if (!track) return;
-    var images = (player.images && player.images.length) ? player.images : [];
-    track.innerHTML = '';
-    dots.innerHTML = '';
-    carouselState.index = 0;
-    carouselState.count = images.length;
-    for (var i = 0; i < images.length; i++) {
-        var img = document.createElement('img');
-        img.src = images[i];
-        img.alt = 'Mystery player';
-        img.loading = 'lazy';
-        img.decoding = 'async';
-        track.appendChild(img);
-        var dot = document.createElement('span');
-        dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
-        (function(idx) { dot.onclick = function() { goToSlide(idx); }; })(i);
-        dots.appendChild(dot);
+/* ---- PHOTO ---- */
+function renderPhoto(player) {
+    var img = document.getElementById('card-photo');
+    if (!img) return;
+    if (player.image) {
+        img.src = player.image;
+        img.alt = 'Mystery celebrity';
+    } else {
+        img.removeAttribute('src');
     }
-    // Hide arrows + dots when there's only a single image
-    var single = images.length <= 1;
-    if (prev) prev.classList.toggle('hidden', single);
-    if (next) next.classList.toggle('hidden', single);
-    dots.classList.toggle('hidden', single);
-    updateCarousel();
-}
-
-function updateCarousel() {
-    var track = document.getElementById('carousel-track');
-    if (!track) return;
-    track.style.transform = 'translateX(' + (-carouselState.index * 100) + '%)';
-    var dots = document.getElementById('carousel-dots').children;
-    for (var i = 0; i < dots.length; i++) {
-        dots[i].className = 'carousel-dot' + (i === carouselState.index ? ' active' : '');
-    }
-}
-
-// Move to slide i, clamped to range (no wrap-around)
-function goToSlide(i) {
-    if (i < 0) i = 0;
-    if (i > carouselState.count - 1) i = carouselState.count - 1;
-    carouselState.index = i;
-    updateCarousel();
 }
 
 function renderClues(player, clueIndex) {
@@ -504,7 +365,7 @@ function getShareText() {
 
 // ✏️ Share link temporarily disabled. Set the final page URL here and re-add
 // SHARE_URL to getShareText()/shareTo() to include it in shared posts again.
-var SHARE_URL = 'https://www.dailymail.com/news/article-15831601/world-cup-legends-quiz.html';
+var SHARE_URL = 'https://www.dailymail.com/games/game/index.html?game=guess-who';
 
 function toggleShareSection() {
     var section = document.getElementById('share-section');
@@ -835,34 +696,6 @@ document.getElementById('next-clue-btn').addEventListener('click', skipClue);
 document.getElementById('header-results-btn').addEventListener('click', function() {
     document.getElementById('result-overlay').classList.remove('hidden');
 });
-
-/* Carousel controls: arrows, and touch-swipe / mouse-drag on the track */
-var carPrev = document.getElementById('carousel-prev');
-var carNext = document.getElementById('carousel-next');
-if (carPrev) carPrev.addEventListener('click', function() { goToSlide(carouselState.index - 1); });
-if (carNext) carNext.addEventListener('click', function() { goToSlide(carouselState.index + 1); });
-(function() {
-    var track = document.getElementById('carousel-track');
-    if (!track) return;
-    var startX = 0, curX = 0, dragging = false;
-    var THRESHOLD = 40; // px of horizontal travel needed to change slide
-    function start(x) { startX = curX = x; dragging = true; }
-    function move(x) { if (dragging) curX = x; }
-    function end() {
-        if (!dragging) return;
-        dragging = false;
-        var dx = curX - startX;
-        if (Math.abs(dx) > THRESHOLD) goToSlide(carouselState.index + (dx < 0 ? 1 : -1));
-    }
-    // Touch (mobile)
-    track.addEventListener('touchstart', function(e) { start(e.touches[0].clientX); }, { passive: true });
-    track.addEventListener('touchmove', function(e) { move(e.touches[0].clientX); }, { passive: true });
-    track.addEventListener('touchend', end);
-    // Mouse drag (desktop)
-    track.addEventListener('mousedown', function(e) { start(e.clientX); e.preventDefault(); });
-    window.addEventListener('mousemove', function(e) { move(e.clientX); });
-    window.addEventListener('mouseup', end);
-})();
 
 /* Run init when DOM is ready (supports defer) */
 if (document.readyState === 'loading') {

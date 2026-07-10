@@ -1,12 +1,7 @@
 [
   {
     "Player": "Jenilee Harrison",
-    "Nation": "",
-    "images": [
-      "guess-who-images/1.avif",
-      "guess-who-images/2.avif",
-      "guess-who-images/3.avif"
-    ],
+    "image": "guess-who-images/1.avif",
     "revealImage": "guess-who-images/r1.avif",
     "clues": [
       "This former actress was spotted in Los Angeles on a rare outing with her adorable white Chihuahua earlier this week.",
