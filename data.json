@@ -1,14 +1,56 @@
 [
   {
-    "Player": "Jenilee Harrison",
-    "image": "guess-who-images/1.avif",
-    "revealImage": "guess-who-images/r1.avif",
+    "Player": "Jeanne Tripplehorn",
+    "image": "guess-who-images/JeanneTripplehorn-GuessWhoQuiz.jpg",
+    "revealImage": "guess-who-images/JeanneTripplehorn-GuessWhoQuiz.jpg",
     "clues": [
-      "This former actress was spotted in Los Angeles on a rare outing with her adorable white Chihuahua earlier this week.",
-      "The 68-year-old television star was pictured running errands with her cute pooch, who was along for the ride in a carrier strapped to her chest.",
-      "She's best known for replacing one of the stars of a hit '70s sitcom as it moved into the 1980s.",
-      "Later that decade, she joined the cast of a massively popular primetime soap opera for several years.",
-      "After establishing herself as a sex symbol on screen, this star posed for Playboy in 1987 – but with unusual stipulations that kept the photoshoot on her terms."
+      "This Oklahoma born actress, now 63, made her movie debut in 1992's Basic Instinct.",
+      "She went on to appear in some of the defining movies of the decade, including The Firm (1993), Reality Bites (1994), and Sliding Doors (1998).",
+      "She played Mormon wife Barbara Henrickson on the HBO show Big Love from 2006 - 2010."
+    ],
+    "Significance": ""
+  },
+  {
+    "Player": "Priscilla Barnes",
+    "image": "guess-who-images/PriscillaBarnes-GuessWhoQuiz.jpg",
+    "revealImage": "guess-who-images/PriscillaBarnes-GuessWhoQuiz.jpg",
+    "clues": [
+      "This New Jersey native guest starred in a string of 1970s TV shows, including The Rockford Files, Starsky & Hutch, and The Love Boat.",
+      "The actress, now 72, is best remembered for her role in Three's Company.",
+      "She joined the show for its final three seasons playing sensible nurse Terri Alden from 1981 to 1984."
+    ],
+    "Significance": ""
+  },
+  {
+    "Player": "Jenette Goldstein",
+    "image": "guess-who-images/JenetteGoldstein-GuessWhoQuiz.jpg",
+    "revealImage": "guess-who-images/JenetteGoldstein-GuessWhoQuiz.jpg",
+    "clues": [
+      "This actress, now age 66, had her breakout role as Private Vasquez in the 1986 blockbuster Aliens, directed by James Cameron.",
+      "She subsequently starred as the ruthless vampire Diamondback in Kathryn Bigelow's 1987 movie Near Dark.",
+      "The Los Angeles born star also appeared as John Connor's foster mom in James Cameron's Terminator 2: Judgement Day (1991)."
+    ],
+    "Significance": ""
+  },
+  {
+    "Player": "Patrika Darbo",
+    "image": "guess-who-images/PatrikaDarbo-GuessWhoQuiz.jpg",
+    "revealImage": "guess-who-images/PatrikaDarbo-GuessWhoQuiz.jpg",
+    "clues": [
+      "This small-screen star, now age 78, had minor roles on classic 1990s sitcoms, including Seinfeld and Roseanne.",
+      "In 2018, she scored a Daytime Emmy Award for her guest appearance on the soap opera The Bay.",
+      "The star's Emmy was infamously revoked after it was discovered that her entry included clips from multiple episodes, instead of one."
+    ],
+    "Significance": ""
+  },
+  {
+    "Player": "Margaret Colin",
+    "image": "guess-who-images/MargaretColin-GuessWhoQuiz.jpg",
+    "revealImage": "guess-who-images/MargaretColin-GuessWhoQuiz.jpg",
+    "clues": [
+      "This Brooklyn born actress was raised on Long Island in a large Catholic family.",
+      "She became a familiar on-screen face in the 1990s, appearing in hit movies Independence Day and The Devil's Own.",
+      "The star played Blair Waldorf's stylish, sharp-tongued mother, Eleanor in the teen drama Gossip Girl, which ran from 2007 to 2012."
     ],
     "Significance": ""
   }

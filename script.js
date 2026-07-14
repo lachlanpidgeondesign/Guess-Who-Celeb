@@ -1,9 +1,34 @@
 /* ============================================
    CONFIG
    ============================================ */
-const START_DATE = new Date(2026, 5, 1); // June 1, 2026
-const TOTAL_GAMES = 1;
-const MAX_GUESSES = 5;
+const TOTAL_QUESTIONS = 5;
+const MAX_GUESSES = 3;
+
+/* ============================================
+   ANALYTICS (GA4 puzzle tracking)
+   ============================================ */
+var PUZZLE_PROVIDER = 'dailymail';
+var PUZZLE_NAME = 'guess-who';
+
+function trackPuzzleEvent(eventName, extra) {
+    var payload = {
+        event_category: 'puzzle',
+        event_label: PUZZLE_NAME,
+        non_interaction: false,
+        puzzle_name: PUZZLE_NAME,
+        puzzle_provider: PUZZLE_PROVIDER
+    };
+    if (extra) {
+        for (var k in extra) {
+            if (Object.prototype.hasOwnProperty.call(extra, k)) payload[k] = extra[k];
+        }
+    }
+    try {
+        if (typeof window.gtag === 'function') {
+            window.gtag('event', eventName, payload);
+        }
+    } catch (e) { /* never break gameplay */ }
+}
 
 /* ============================================
    CELEBRITY DATA - loaded from data.json
@@ -81,8 +106,8 @@ async function loadPlayerData() {
 /* ============================================
    STATE
    ============================================ */
-let currentDay = 1;
-let gameStates = {};
+let currentQuestion = 0;      // 0-based index into PLAYERS
+let questionStates = {};
 
 
 /* ============================================
@@ -119,52 +144,21 @@ function checkAnswer(guess, acceptedAnswers) {
     return 'wrong';
 }
 
-function getDateForDay(dayNum) {
-    const d = new Date(START_DATE);
-    d.setDate(d.getDate() + dayNum - 1);
-    return d;
-}
-
-function formatDate(date) {
-    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    return days[date.getDay()] + ' ' + date.getDate() + ' ' + months[date.getMonth()];
-}
-
-
 /* ============================================
-   DATE LOGIC
+   QUESTION STATE
    ============================================ */
 
-function getTodayGameDay() {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const start = new Date(START_DATE.getFullYear(), START_DATE.getMonth(), START_DATE.getDate());
-    return Math.floor((today - start) / (1000*60*60*24)) + 1;
+function getQuestionState(i) {
+    if (!questionStates[i]) questionStates[i] = { wrongGuesses: [], revealedCount: 1, viewIndex: 0, results: [], completed: false, won: false };
+    return questionStates[i];
 }
 
-function getMaxPlayableDay() {
-    const params = new URLSearchParams(window.location.search);
-    if (params.has('testday')) return Math.min(parseInt(params.get('testday')) || TOTAL_GAMES, TOTAL_GAMES);
-    const today = getTodayGameDay();
-    return today < 1 ? 0 : Math.min(today, TOTAL_GAMES);
-}
-
-
-/* ============================================
-   STORAGE
-   ============================================ */
-
-function saveGameStates() {
-    // No persistence - each visit starts fresh
-}
-function loadGameStates() {
-    gameStates = {};
-    try { localStorage.removeItem('wcquiz_states'); } catch(e) {}
-}
-function getGameState(day) {
-    if (!gameStates[day]) gameStates[day] = { wrongGuesses: [], clueIndex: 0, revealedCount: 1, viewIndex: 0, results: [], completed: false, won: false, score: 0 };
-    return gameStates[day];
+function getTotalScore() {
+    var s = 0;
+    for (var k in questionStates) {
+        if (questionStates[k] && questionStates[k].won) s++;
+    }
+    return s;
 }
 
 
@@ -175,7 +169,7 @@ function getGameState(day) {
 function renderCard(player) {
     var card = document.getElementById('quiz-card');
     var nameEl = document.getElementById('card-name');
-    var state = getGameState(currentDay);
+    var state = getQuestionState(currentQuestion);
 
     // Reveal the name only once the game is over
     if (state.completed) {
@@ -252,45 +246,13 @@ function renderClueNav(player, state) {
     }
 }
 
-function renderDayInfo() {
-    var maxDay = getMaxPlayableDay();
-    document.getElementById('day-number').textContent = 'Day ' + currentDay;
-    document.getElementById('day-date').textContent = formatDate(getDateForDay(currentDay));
-    document.getElementById('prev-day').disabled = currentDay <= 1;
-    document.getElementById('next-day').disabled = currentDay >= maxDay;
-    var pickerLabel = document.getElementById('picker-btn-label');
-    if (pickerLabel) pickerLabel.textContent = 'Day ' + currentDay;
-}
-
-function renderPicker() {
-    var grid = document.getElementById('picker-grid');
-    var maxDay = getMaxPlayableDay();
-    grid.innerHTML = '';
-    for (var d = 1; d <= TOTAL_GAMES; d++) {
-        var btn = document.createElement('div');
-        btn.className = 'pick-day';
-        btn.textContent = d;
-        var state = gameStates[d];
-        if (d > maxDay) {
-            btn.classList.add('locked');
-        } else if (d === currentDay) {
-            btn.classList.add('current');
-            (function(day) {
-                btn.onclick = function() { closePicker(); };
-            })(d);
-        } else if (state && state.completed) {
-            btn.classList.add('completed');
-            (function(day) {
-                btn.onclick = function() { closePicker(); loadDay(day); };
-            })(d);
-        } else {
-            btn.classList.add('available');
-            (function(day) {
-                btn.onclick = function() { closePicker(); loadDay(day); };
-            })(d);
-        }
-        grid.appendChild(btn);
-    }
+function renderProgress() {
+    var scoreEl = document.getElementById('hdr-score');
+    var qEl = document.getElementById('hdr-question');
+    var fill = document.getElementById('progress-fill');
+    if (scoreEl) scoreEl.textContent = 'Score: ' + getTotalScore();
+    if (qEl) qEl.textContent = 'Question ' + (currentQuestion + 1) + ' of ' + TOTAL_QUESTIONS;
+    if (fill) fill.style.width = (((currentQuestion + 1) / TOTAL_QUESTIONS) * 100) + '%';
 }
 
 function showFeedback(type, msg) {
@@ -303,7 +265,8 @@ function showFeedback(type, msg) {
     }
 }
 
-function showResult(won, score, player) {
+function showFinalResult() {
+    trackPuzzleEvent('puzzle_completed', { successful_puzzle_completions: 1 });
     var area = document.getElementById('result-overlay');
     var title = document.getElementById('result-title');
     var scoreEl = document.getElementById('result-score');
@@ -318,28 +281,23 @@ function showResult(won, score, player) {
         dateLabel.textContent = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
     }
 
-    if (won) {
-        var cluesUsed = MAX_GUESSES - score + 1;
-        title.textContent = score === MAX_GUESSES ? 'Brilliant!' : score >= 3 ? 'Well done!' : 'Got it!';
-        scoreEl.textContent = 'You guessed ' + player.name + ' with ' + cluesUsed + (cluesUsed === 1 ? ' clue' : ' clues');
-    } else {
-        title.textContent = 'Unlucky!';
-        scoreEl.textContent = 'The answer was ' + player.name;
-    }
-    // Reveal image (shown in place of the fun-fact copy) for entries that supply one
+    var total = getTotalScore();
+    title.textContent = total === TOTAL_QUESTIONS ? 'Brilliant!'
+        : total >= 3 ? 'Well done!'
+        : total >= 1 ? 'Good try!'
+        : 'Better luck next time!';
+    scoreEl.textContent = 'You scored ' + total + ' / ' + TOTAL_QUESTIONS;
+
+    // No per-celebrity reveal image or fun fact on the summary screen
     var revealImg = document.getElementById('result-reveal-img');
     if (revealImg) {
-        if (player.revealImage) {
-            revealImg.src = player.revealImage;
-            revealImg.alt = player.name;
-            revealImg.classList.remove('hidden');
-        } else {
-            revealImg.removeAttribute('src');
-            revealImg.classList.add('hidden');
-        }
+        revealImg.removeAttribute('src');
+        revealImg.classList.add('hidden');
     }
-    funfact.textContent = player.funFact || '';
-    funfact.style.display = player.funFact ? 'block' : 'none';
+    if (funfact) {
+        funfact.textContent = '';
+        funfact.style.display = 'none';
+    }
 
     var shareSection = document.getElementById('share-section');
     if (shareSection) shareSection.classList.add('hidden');
@@ -353,14 +311,8 @@ function showResult(won, score, player) {
    GAME LOGIC
    ============================================ */
 function getShareText() {
-    var state = getGameState(currentDay);
-    var player = PLAYERS[currentDay - 1];
-    if (state.won) {
-        var cluesUsed = MAX_GUESSES - state.score + 1;
-        return 'I guessed the celebrity in ' + cluesUsed + ' clue' + (cluesUsed !== 1 ? 's' : '') + " on today's Guess Who. Can you beat that?\n\nTry it out!";
-    } else {
-        return "I couldn't guess today's Guess Who. Can you do better?\n\nTry it out!";
-    }
+    var total = getTotalScore();
+    return 'I scored ' + total + '/' + TOTAL_QUESTIONS + " on today's Guess Who. Can you beat that?\n\nTry it out!";
 }
 
 // ✏️ Share link temporarily disabled. Set the final page URL here and re-add
@@ -404,15 +356,10 @@ function shareTo(platform) {
     window.open(url, '_blank', 'noopener');
 }
 
-function loadDay(day) {
-    var maxDay = getMaxPlayableDay();
-    if (day < 1 || day > maxDay) return;
-    currentDay = day;
-    var player = PLAYERS[day - 1];
-
-    var url = new URL(window.location);
-    url.searchParams.set('day', day);
-    history.replaceState(null, '', url);
+function loadQuestion(i) {
+    if (i < 0 || i >= TOTAL_QUESTIONS) return;
+    currentQuestion = i;
+    var player = PLAYERS[i];
 
     document.getElementById('pre-launch-screen').classList.remove('active');
     document.getElementById('game-screen').classList.add('active');
@@ -425,18 +372,16 @@ function loadDay(day) {
         document.getElementById('clue-display').innerHTML = '';
         document.getElementById('guess-area').style.display = 'none';
         document.getElementById('attempts-display').innerHTML = '';
-        document.getElementById('result-overlay').classList.add('hidden');
         document.getElementById('feedback').className = 'feedback hidden';
-        renderDayInfo(); renderPicker();
+        renderProgress();
         return;
     }
     document.querySelector('.game-col-card').style.display = '';
     document.getElementById('guess-area').style.display = 'flex';
     document.getElementById('feedback').className = 'feedback hidden';
-    document.getElementById('result-overlay').classList.add('hidden');
     document.getElementById('answer-reveal').className = 'answer-reveal hidden';
 
-    var state = getGameState(day);
+    var state = getQuestionState(i);
     // Ensure per-clue tracking is sized to this player's clues
     if (!state.results) state.results = [];
     while (state.results.length < player.clues.length) state.results.push('none');
@@ -444,25 +389,27 @@ function loadDay(day) {
     if (state.revealedCount > player.clues.length) state.revealedCount = player.clues.length;
     if (typeof state.viewIndex !== 'number') state.viewIndex = 0;
 
-    if (state.completed) {
-        renderCard(player);
-        renderClues(player, state.viewIndex);
-        renderClueNav(player, state);
-        showResult(state.won, state.score, player);
-        showAnswerReveal(state.won, player.name);
-        document.getElementById('guess-area').style.display = 'none';
-    } else {
-        renderCard(player);
-        renderClues(player, state.viewIndex);
-        renderClueNav(player, state);
-        document.getElementById('guess-area').style.display = 'flex';
-        var inp = document.getElementById('guess-input');
-        inp.value = ''; inp.focus();
-    }
+    renderCard(player);
+    renderClues(player, state.viewIndex);
+    renderClueNav(player, state);
+    document.getElementById('guess-area').style.display = 'flex';
+    var inp = document.getElementById('guess-input');
+    inp.value = ''; inp.focus();
 
     updateGuessButton(state);
     updateNextClueBtn(state, player);
-    renderDayInfo(); renderPicker();
+    renderProgress();
+}
+
+// Move to the next celebrity, or show the final score after the last one
+function advanceQuestion() {
+    if (currentQuestion + 1 < TOTAL_QUESTIONS) {
+        loadQuestion(currentQuestion + 1);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+        renderProgress();
+        showFinalResult();
+    }
 }
 
 function updateGuessButton(state) {
@@ -474,16 +421,15 @@ function makeGuess() {
     var input = document.getElementById('guess-input');
     var guess = input.value.trim();
     if (!guess) return;
-    var player = PLAYERS[currentDay - 1];
+    var player = PLAYERS[currentQuestion];
     if (!player) return;
-    var state = getGameState(currentDay);
+    var state = getQuestionState(currentQuestion);
     if (state.completed) return;
 
     var result = checkAnswer(guess, player.accepted);
 
     if (result === 'exact' || result === 'close') {
         state.completed = true; state.won = true;
-        state.score = MAX_GUESSES - state.wrongGuesses.length;
         // The clue they were viewing when they solved it turns green
         state.results[state.viewIndex] = 'correct';
         renderCard(player);
@@ -491,11 +437,11 @@ function makeGuess() {
         document.getElementById('quiz-card').classList.add('celebrate');
         showFeedback('correct', result === 'close' ? 'Close enough! It\'s ' + player.name + '!' : 'Correct! It\'s ' + player.name + '!');
         showAnswerReveal(true, player.name);
-        setTimeout(function() { showResult(true, state.score, player); }, 2000);
         document.getElementById('guess-area').style.display = 'none';
         document.getElementById('next-clue-btn').classList.add('hidden');
         launchConfetti();
-        saveGameStates(); renderPicker();
+        renderProgress();
+        setTimeout(advanceQuestion, 2000);
     } else {
         state.wrongGuesses.push(guess);
         var wc = state.wrongGuesses.length;
@@ -505,32 +451,30 @@ function makeGuess() {
         card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
 
         if (wc >= MAX_GUESSES) {
-            state.completed = true; state.won = false; state.score = 0;
+            state.completed = true; state.won = false;
             renderCard(player); renderClueNav(player, state);
             showFeedback('wrong', 'Not quite!');
             showAnswerReveal(false, player.name);
             document.getElementById('guess-area').style.display = 'none';
             document.getElementById('next-clue-btn').classList.add('hidden');
-            setTimeout(function() { showResult(false, 0, player); }, 2000);
+            setTimeout(advanceQuestion, 2000);
         } else {
             // Unlock the next clue and auto-advance to it
             if (state.revealedCount < player.clues.length) state.revealedCount++;
             state.viewIndex = state.revealedCount - 1;
-            state.clueIndex = state.viewIndex;
             renderClues(player, state.viewIndex);
             renderClueNav(player, state);
             showFeedback('wrong', 'Not right - here\'s your next clue!');
             updateNextClueBtn(state, player);
         }
-        saveGameStates(); renderPicker();
     }
     input.value = '';
 }
 
 function skipClue() {
-    var player = PLAYERS[currentDay - 1];
+    var player = PLAYERS[currentQuestion];
     if (!player || !player.clues) return;
-    var state = getGameState(currentDay);
+    var state = getQuestionState(currentQuestion);
     if (state.completed) return;
 
     // Skipping the current furthest clue: mark it 'skip' and count it as an attempt
@@ -539,7 +483,7 @@ function skipClue() {
     var wc = state.wrongGuesses.length;
 
     if (wc >= MAX_GUESSES) {
-        state.completed = true; state.won = false; state.score = 0;
+        state.completed = true; state.won = false;
         state.viewIndex = state.revealedCount - 1;
         renderCard(player); renderClueNav(player, state);
         renderClues(player, state.viewIndex);
@@ -547,17 +491,15 @@ function skipClue() {
         showAnswerReveal(false, player.name);
         document.getElementById('guess-area').style.display = 'none';
         document.getElementById('next-clue-btn').classList.add('hidden');
-        setTimeout(function() { showResult(false, 0, player); }, 2000);
+        setTimeout(advanceQuestion, 2000);
     } else {
         // Unlock the next clue and auto-advance to it
         if (state.revealedCount < player.clues.length) state.revealedCount++;
         state.viewIndex = state.revealedCount - 1;
-        state.clueIndex = state.viewIndex;
         renderClues(player, state.viewIndex);
         renderClueNav(player, state);
         updateNextClueBtn(state, player);
     }
-    saveGameStates(); renderPicker();
 }
 
 function showAnswerReveal(won, playerName) {
@@ -583,34 +525,12 @@ function updateNextClueBtn(state, player) {
 
 
 /* ============================================
-   NAVIGATION & PICKER
-   ============================================ */
-
-function goToPrevDay() {
-    document.getElementById('result-overlay').classList.add('hidden');
-    if (currentDay > 1) { loadDay(currentDay - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-}
-
-function goToNextDay() {
-    document.getElementById('result-overlay').classList.add('hidden');
-    if (currentDay < getMaxPlayableDay()) { loadDay(currentDay + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-}
-
-function openPicker() {
-    document.getElementById('day-picker-overlay').classList.add('open');
-    renderPicker();
-}
-function closePicker() {
-    document.getElementById('day-picker-overlay').classList.remove('open');
-}
-
-
-/* ============================================
    CONFETTI
    ============================================ */
 
 function launchConfetti() {
     var c = document.getElementById('confetti-container');
+    if (!c) return;
     c.innerHTML = '';
     var cols = ['#6ea93a', '#8dc461', '#5a8c2e', '#b8dda0', '#fff', '#ddd'];
     for (var i = 0; i < 50; i++) {
@@ -630,72 +550,42 @@ function launchConfetti() {
 
 
 /* ============================================
-   COUNTDOWN (pre-launch)
-   ============================================ */
-
-function updateCountdown() {
-    var now = new Date();
-    var diff = START_DATE - now;
-    if (diff <= 0) { init(); return; }
-    var d = Math.floor(diff / 86400000);
-    var h = Math.floor((diff % 86400000) / 3600000);
-    var m = Math.floor((diff % 3600000) / 60000);
-    var s = Math.floor((diff % 60000) / 1000);
-    var el = document.getElementById('countdown-display');
-    if (el) el.textContent = d + 'd ' + h + 'h ' + m + 'm ' + s + 's';
-}
-
-
-/* ============================================
    INIT
    ============================================ */
 
 async function init() {
     await loadPlayerData();
-    loadGameStates();
-    var maxDay = getMaxPlayableDay();
-    var params = new URLSearchParams(window.location.search);
-    var reqDay = parseInt(params.get('day')) || 0;
-
-    if (maxDay < 1) {
-        document.getElementById('pre-launch-screen').classList.add('active');
-        updateCountdown();
-        setInterval(updateCountdown, 1000);
-        return;
-    }
-
-    // Default to today's game
-    var dayToShow = maxDay;
-    if (reqDay >= 1 && reqDay <= maxDay) {
-        dayToShow = reqDay;
-    }
-
-    loadDay(dayToShow);
+    questionStates = {};
+    document.getElementById('pre-launch-screen').classList.remove('active');
+    document.getElementById('game-screen').classList.add('active');
+    loadQuestion(0);
 }
 
 /* Event listeners */
-var openPickerBtn = document.getElementById('open-picker');
-if (openPickerBtn) openPickerBtn.addEventListener('click', openPicker);
-document.getElementById('day-picker-overlay').addEventListener('click', function(e) {
-    if (e.target === document.getElementById('day-picker-overlay')) closePicker();
-});
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closePicker();
-});
-var prevDayBtn = document.getElementById('prev-day');
-if (prevDayBtn) prevDayBtn.addEventListener('click', function() {
-    if (currentDay > 1) { loadDay(currentDay - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-});
-var nextDayBtn = document.getElementById('next-day');
-if (nextDayBtn) nextDayBtn.addEventListener('click', function() {
-    if (currentDay < getMaxPlayableDay()) { loadDay(currentDay + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-});
 document.getElementById('guess-btn').addEventListener('click', makeGuess);
 document.getElementById('guess-input').addEventListener('keydown', function(e) { if (e.key === 'Enter') makeGuess(); });
 document.getElementById('next-clue-btn').addEventListener('click', skipClue);
 document.getElementById('header-results-btn').addEventListener('click', function() {
     document.getElementById('result-overlay').classList.remove('hidden');
 });
+
+/* Splash screen */
+(function() {
+    var splashDate = document.getElementById('splash-date');
+    if (splashDate) {
+        var d = new Date();
+        var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        var day = d.getDate();
+        var suffix = (day % 10 === 1 && day !== 11) ? 'st' : (day % 10 === 2 && day !== 12) ? 'nd' : (day % 10 === 3 && day !== 13) ? 'rd' : 'th';
+        splashDate.textContent = days[d.getDay()] + ' ' + months[d.getMonth()] + ' ' + day + suffix + ' ' + d.getFullYear();
+    }
+    var startBtn = document.getElementById('splash-start-btn');
+    if (startBtn) startBtn.addEventListener('click', function() {
+        trackPuzzleEvent('puzzle_started');
+        document.getElementById('splash-screen').classList.add('hidden');
+    });
+})();
 
 /* Run init when DOM is ready (supports defer) */
 if (document.readyState === 'loading') {

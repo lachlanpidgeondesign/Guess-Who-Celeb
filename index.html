@@ -39,11 +39,30 @@
 </head>
 <body>
 
+<!-- SPLASH SCREEN -->
+<div id="splash-screen" class="splash-screen">
+    <div class="splash-content">
+        <img src="images/Guess Who.svg" alt="" class="splash-icon">
+        <h1 class="splash-title">Guess Who</h1>
+        <button class="splash-btn" id="splash-start-btn">Start game</button>
+        <p class="splash-date" id="splash-date"></p>
+    </div>
+</div>
+
 <!-- HEADER -->
 <header class="quiz-header">
     <img src="images/Guess Who.svg" alt="Guess Who" class="header-icon">
     <button class="header-results-btn hidden" id="header-results-btn">Results</button>
 </header>
+
+<!-- SUB-HEADER: score + question + progress -->
+<div class="quiz-subheader">
+    <div class="subheader-row">
+        <span class="header-score" id="hdr-score">Score: 0</span>
+        <span class="header-question" id="hdr-question">Question 1 of 5</span>
+    </div>
+    <div class="quiz-progress"><div class="quiz-progress-fill" id="progress-fill"></div></div>
+</div>
 
 <!-- HOW TO PLAY OVERLAY -->
 <div class="htp-overlay hidden" id="htp-overlay" role="dialog" aria-modal="true" aria-label="How to play">
@@ -100,8 +119,8 @@
 
             <!-- Play area: clue + guess + attempts -->
             <div class="game-col-play">
-                <!-- Attempts (above clue) -->
-                <div class="attempts-display" id="attempts-display"></div>
+                <!-- Clue progress dots (hidden) -->
+                <div class="attempts-display" id="attempts-display" hidden></div>
 
                 <!-- Single current clue -->
                 <div id="clue-display"></div>
@@ -125,6 +144,9 @@
         </div>
     </div>
 </main>
+
+<!-- CONFETTI -->
+<div class="confetti-container" id="confetti-container"></div>
 
 <!-- RESULT OVERLAY -->
 <div class="result-overlay hidden" id="result-overlay" role="dialog" aria-modal="true" aria-label="Result">
