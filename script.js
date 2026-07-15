@@ -9,6 +9,28 @@ const MAX_GUESSES = 3;
    ============================================ */
 var PUZZLE_PROVIDER = 'dailymail';
 var PUZZLE_NAME = 'guess-who';
+var SHEETS_ENDPOINT = 'https://script.google.com/a/macros/dmgmedia.co.uk/s/AKfycbyrmojeZe0buOOAa52qXru8mS5cJECPpdUKQx3oQZZIMD_-qlD4v0NF8BAuLJ36zMj2jg/exec';
+var SESSION_ID = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+});
+
+function trackSheets(eventName, score) {
+    try {
+        var payload = {
+            timestamp: new Date().toISOString(),
+            event: eventName,
+            puzzle_name: PUZZLE_NAME,
+            puzzle_provider: PUZZLE_PROVIDER,
+            session_id: SESSION_ID,
+            page_url: (window.parent !== window ? document.referrer : window.location.href) || window.location.href
+        };
+        if (score !== undefined) payload.score = score;
+        navigator.sendBeacon
+            ? navigator.sendBeacon(SHEETS_ENDPOINT, JSON.stringify(payload))
+            : fetch(SHEETS_ENDPOINT, { method: 'POST', body: JSON.stringify(payload) });
+    } catch (e) { /* never break gameplay */ }
+}
 
 // Resolve the gtag function to use. The game runs in a SAME-ORIGIN iframe inside
 // the Daily Mail article, so we fire on the parent page's configured GA4 container
@@ -278,6 +300,7 @@ function showFeedback(type, msg) {
 
 function showFinalResult() {
     trackPuzzleEvent('puzzle_completed', { successful_puzzle_completions: 1 });
+    trackSheets('puzzle_completed', getTotalScore());
     var area = document.getElementById('result-overlay');
     var title = document.getElementById('result-title');
     var scoreEl = document.getElementById('result-score');
@@ -594,6 +617,7 @@ document.getElementById('header-results-btn').addEventListener('click', function
     var startBtn = document.getElementById('splash-start-btn');
     if (startBtn) startBtn.addEventListener('click', function() {
         trackPuzzleEvent('puzzle_started');
+        trackSheets('puzzle_started');
         document.getElementById('splash-screen').classList.add('hidden');
     });
 })();
