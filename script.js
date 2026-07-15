@@ -10,6 +10,18 @@ const MAX_GUESSES = 3;
 var PUZZLE_PROVIDER = 'dailymail';
 var PUZZLE_NAME = 'guess-who';
 
+// Resolve the gtag function to use. The game runs in a SAME-ORIGIN iframe inside
+// the Daily Mail article, so we fire on the parent page's configured GA4 container
+// (window.parent.gtag) — this enriches the hit with all standard dimensions.
+// Falls back to a local window.gtag if the game is ever loaded standalone.
+function resolveGtag() {
+    try {
+        if (window.parent && typeof window.parent.gtag === 'function') return window.parent.gtag;
+    } catch (e) { /* cross-origin access blocked — fall through */ }
+    if (typeof window.gtag === 'function') return window.gtag;
+    return null;
+}
+
 function trackPuzzleEvent(eventName, extra) {
     var payload = {
         event_category: 'puzzle',
@@ -24,9 +36,8 @@ function trackPuzzleEvent(eventName, extra) {
         }
     }
     try {
-        if (typeof window.gtag === 'function') {
-            window.gtag('event', eventName, payload);
-        }
+        var g = resolveGtag();
+        if (g) g('event', eventName, payload);
     } catch (e) { /* never break gameplay */ }
 }
 
