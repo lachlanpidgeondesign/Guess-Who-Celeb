@@ -307,14 +307,6 @@ function showFinalResult() {
     var funfact = document.getElementById('result-funfact');
     area.classList.remove('hidden');
 
-    // Date label
-    var dateLabel = document.getElementById('result-date-label');
-    if (dateLabel) {
-        var d = new Date();
-        var months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-        dateLabel.textContent = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
-    }
-
     var total = getTotalScore();
     title.textContent = total === TOTAL_QUESTIONS ? 'Brilliant!'
         : total >= 3 ? 'Well done!'
@@ -605,15 +597,6 @@ document.getElementById('header-results-btn').addEventListener('click', function
 
 /* Splash screen */
 (function() {
-    var splashDate = document.getElementById('splash-date');
-    if (splashDate) {
-        var d = new Date();
-        var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-        var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-        var day = d.getDate();
-        var suffix = (day % 10 === 1 && day !== 11) ? 'st' : (day % 10 === 2 && day !== 12) ? 'nd' : (day % 10 === 3 && day !== 13) ? 'rd' : 'th';
-        splashDate.textContent = days[d.getDay()] + ' ' + months[d.getMonth()] + ' ' + day + suffix + ' ' + d.getFullYear();
-    }
     var startBtn = document.getElementById('splash-start-btn');
     if (startBtn) startBtn.addEventListener('click', function() {
         trackPuzzleEvent('puzzle_started');

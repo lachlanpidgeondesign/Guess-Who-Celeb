@@ -882,8 +882,9 @@ body {
     color: #861129;
 }
 .result-title {
-    font-size: 26px;
+    font-size: 20px;
     font-weight: 800;
+    font-family: 'Literata', serif;
     color: var(--text);
     margin-bottom: 12px;
 }
@@ -894,9 +895,9 @@ body {
     margin-bottom: 16px;
 }
 .result-score {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text);
+    font-size: 26px;
+    font-weight: 800;
+    color: #191919;
     margin-bottom: 8px;
 }
 .result-reveal-img {
@@ -929,6 +930,7 @@ body {
     transition: background 0.2s;
 }
 .result-share-btn:hover { background: #B31636; }
+.result-share-btn[hidden] { display: none; }
 .share-section { margin-bottom: 16px; }
 .share-section.hidden { display: none; }
 .share-message {

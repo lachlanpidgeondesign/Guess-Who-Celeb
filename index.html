@@ -55,7 +55,6 @@
         <img src="images/Guess Who.svg" alt="" class="splash-icon">
         <h1 class="splash-title">Guess Who</h1>
         <button class="splash-btn" id="splash-start-btn">Start game</button>
-        <p class="splash-date" id="splash-date"></p>
     </div>
 </div>
 
@@ -164,7 +163,7 @@
         <button class="result-close" id="result-close" onclick="document.getElementById('result-overlay').classList.add('hidden')">&times;</button>
         <div class="result-header-badge">
             <img src="images/Guess Who.svg" alt="" class="result-icon">
-            <div class="result-header-text">GUESS WHO | <span id="result-date-label"></span></div>
+            <div class="result-header-text">GUESS WHO</div>
         </div>
         <div class="result-title" id="result-title"></div>
         <div class="result-card">
@@ -172,8 +171,8 @@
             <img class="result-reveal-img hidden" id="result-reveal-img" alt="" decoding="async">
             <div class="result-funfact" id="result-funfact"></div>
         </div>
-        <button class="result-share-btn" id="result-share-btn" onclick="toggleShareSection()">Share</button>
-        <div class="share-section hidden" id="share-section">
+        <button class="result-share-btn hidden" id="result-share-btn" onclick="toggleShareSection()" hidden style="display:none">Share</button>
+        <div class="share-section hidden" id="share-section" hidden style="display:none">
             <div class="share-message" id="share-message"></div>
             <div class="share-icons">
                 <button class="share-icon" onclick="shareTo('facebook')"><img src="images/facebook.png" alt="Facebook"></button>
